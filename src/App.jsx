@@ -15,8 +15,11 @@ const bundleDropModule = sdk.getBundleDropModule(
 
 const App = () => {
   // Use the connectWallet hook thirdweb gives us
-  const {connectWallet, address, error, provider, disconnectWallet } = useWeb3();
+  const {connectWallet, address, error, provider } = useWeb3();
   console.log("👋 Address:", address)
+
+  // State variable for us to know if user has our NFT.
+  const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
 
   useEffect(()=>{
     // If they don't have a connected wallet, exit
