@@ -18,8 +18,22 @@ const App = () => {
   const {connectWallet, address, error, provider } = useWeb3();
   console.log("👋 Address:", address)
 
+  // The signer is required to sign transactions on the blockchain.
+  // Without it we can only read data, not write.
+  const signer = provider ? provider.getSigner() : undefined;
+
   // State variable for us to know if user has our NFT.
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
+
+  // isClaiming lets us easily keep a loading state whiel the NFT is minting
+  const [isClaiming, setIsClaiming] = useState(false);
+
+  // interaction useEffect
+  useEffect(() => {
+    // We pass the signer to the sdk, which enables us to interact with
+    // our deployed contract!
+    sdk.setProviderOrSigner(signer);
+  }, [signer]);
 
   useEffect(()=>{
     // If they don't have a connected wallet, exit
@@ -47,8 +61,6 @@ const App = () => {
 
   },[address]);
 
-  //  ...all other code that was already there below
-
   // This is the case where the user hasn't connected their wallet
   // to your web app. Let them call connectWallet.
 
@@ -66,10 +78,33 @@ const App = () => {
   // This is the case where we have the user's address
   // which means they've connected their wallet to our site
 
+  const mintNft = () => {
+    setIsClaiming(true);
+    // Call bundleDropModule.claim("0", 1) to mint NFT to user's wallet.
+    bundleDropModule
+    .claim("0", 1)
+    .catch((err) => {
+      console.error("failed to claim", err);
+      setIsClaiming(false);
+    })
+    .finally(() => {
+      // Stop loading state
+      setIsClaiming(false);
+      // Set claim state.
+      setHasClaimedNFT(true);
+      // Show user their fancy new NFT!
+      console.log(`🌊 Successfully Minted! Check it out on OpenSea: https://testnets.opensea.io/assets/${bundleDropModule.address}/0`
+      );
+    });
+  }
 
   return (
     <div className="landing">
-      <h1>👀 wallet connected, now what was your weird breakfast today?  </h1>
+      <h1>👀 Have you minted your weird breakfast ingredients NFT yet?  </h1>
+      <button
+        disabled={isClaiming}
+        onClick={() => mintNft()}
+      >{isClaiming ? "Minting..." : "Mint your NFT (FREE)"}</button>
     </div>
   );
 };
