@@ -1,7 +1,7 @@
-import {useEffect, useMemo, useState} from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // import thirdweb
-import {useWeb3} from "@3rdweb/hooks";
+import { useWeb3 } from "@3rdweb/hooks";
 
 import { ThirdwebSDK } from "@3rdweb/sdk";
 
@@ -15,7 +15,7 @@ const bundleDropModule = sdk.getBundleDropModule(
 
 const App = () => {
   // Use the connectWallet hook thirdweb gives us
-  const {connectWallet, address, error, provider } = useWeb3();
+  const { connectWallet, address, error, provider } = useWeb3();
   console.log("👋 Address:", address)
 
   // The signer is required to sign transactions on the blockchain.
@@ -35,7 +35,7 @@ const App = () => {
     sdk.setProviderOrSigner(signer);
   }, [signer]);
 
-  useEffect(()=>{
+  useEffect(() => {
     // If they don't have a connected wallet, exit
     if (!address) {
       return;
@@ -54,12 +54,12 @@ const App = () => {
           console.log("😭 this user doesn't have a membership NFT.")
         }
       })
-      .catch((error)=> {
+      .catch((error) => {
         setHasClaimedNFT(false);
         console.error("failed to nft balance", error);
       });
 
-  },[address]);
+  }, [address]);
 
   // This is the case where the user hasn't connected their wallet
   // to your web app. Let them call connectWallet.
@@ -75,6 +75,16 @@ const App = () => {
     );
   }
 
+  // If the user has already claimed their membership NFT!
+  if (hasClaimedNFT) {
+    return (
+      <div className="member-page">
+        <h1>🍪Weird Breakfasts DAO Member Page</h1>
+        <p>Congratulations for being a member, what weird breakfast have you had lately?</p>
+      </div>
+    );
+  };
+
   // This is the case where we have the user's address
   // which means they've connected their wallet to our site
 
@@ -82,20 +92,20 @@ const App = () => {
     setIsClaiming(true);
     // Call bundleDropModule.claim("0", 1) to mint NFT to user's wallet.
     bundleDropModule
-    .claim("0", 1)
-    .catch((err) => {
-      console.error("failed to claim", err);
-      setIsClaiming(false);
-    })
-    .finally(() => {
-      // Stop loading state
-      setIsClaiming(false);
-      // Set claim state.
-      setHasClaimedNFT(true);
-      // Show user their fancy new NFT!
-      console.log(`🌊 Successfully Minted! Check it out on OpenSea: https://testnets.opensea.io/assets/${bundleDropModule.address}/0`
-      );
-    });
+      .claim("0", 1)
+      .catch((err) => {
+        console.error("failed to claim", err);
+        setIsClaiming(false);
+      })
+      .finally(() => {
+        // Stop loading state
+        setIsClaiming(false);
+        // Set claim state.
+        setHasClaimedNFT(true);
+        // Show user their fancy new NFT!
+        console.log(`🌊 Successfully Minted! Check it out on OpenSea: https://testnets.opensea.io/assets/${bundleDropModule.address}/0`
+        );
+      });
   }
 
   return (
